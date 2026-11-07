@@ -1,0 +1,22 @@
+{
+  "signature": "7d98c036b6b18b4912b5d39b6ef7166fcea549f9f48791ae6798d2da99109aa0",
+  "parameters": {
+    "query": "Лодейное Поле, Ленинградская область, Россия",
+    "relation": null,
+    "local_file": null,
+    "local_sha256": null
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-10-28T20:22:44.717229+00:00"
+}

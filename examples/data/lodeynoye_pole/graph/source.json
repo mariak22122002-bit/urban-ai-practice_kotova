@@ -1,0 +1,16 @@
+{
+  "mode": "drive",
+  "source_page": "https://www.openstreetmap.org",
+  "source_date": "2026-11-07",
+  "local_file": "/Users/mariak/ai-course/python-package-boilerplate/examples/data/lodeynoye_pole/graph/drive.graphml",
+  "sha256": "6248c068720bd17682fddc5345923e8fd19131f41797041545562ef3d606f9c3",
+  "graph_created_with": "OSMnx",
+  "graph_creation_method": "network_type=drive",
+  "time_method": "modelled_free_flow",
+  "source_time_attribute": "travel_time",
+  "source_time_unit": "seconds",
+  "calculation_time_attribute": "time_min",
+  "calculation_time_unit": "minutes",
+  "nodes": 419,
+  "edges": 1169
+}

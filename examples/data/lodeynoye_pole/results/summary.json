@@ -1,0 +1,79 @@
+{
+  "title": "Учебное исследование города Лодейное Поле",
+  "saved_at_utc": "2026-11-07T12:46:24.319763+00:00",
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "notebook_revision": 1,
+  "boundary_query": "Лодейное Поле, Ленинградская область, Россия",
+  "boundary_sha256": "5d0d635934126b324892b838344ebfe4262da0078e20a3d41d8aec72d8af4a5a",
+  "blocks": 253,
+  "model_population": 14882.0,
+  "schools": 6,
+  "model_school_capacity": 1500.0,
+  "school_demand": 1807.0,
+  "city_provision_strong": 0.8301051466519093,
+  "city_provision_weak": 0.8301051466519093,
+  "graph": {
+    "mode": "drive",
+    "source_page": "https://www.openstreetmap.org",
+    "source_date": "2026-11-07",
+    "local_file": "/Users/mariak/ai-course/python-package-boilerplate/examples/data/lodeynoye_pole/graph/drive.graphml",
+    "sha256": "6248c068720bd17682fddc5345923e8fd19131f41797041545562ef3d606f9c3",
+    "graph_created_with": "OSMnx",
+    "graph_creation_method": "network_type=drive",
+    "time_method": "modelled_free_flow",
+    "source_time_attribute": "travel_time",
+    "source_time_unit": "seconds",
+    "calculation_time_attribute": "time_min",
+    "calculation_time_unit": "minutes",
+    "nodes": 419,
+    "edges": 1169
+  },
+  "matrix_parameters": {
+    "blocks": "32deec3e34b77c0ea3a74040362ba189a6cec52f892718c325333ef6be204c94",
+    "graph": "6248c068720bd17682fddc5345923e8fd19131f41797041545562ef3d606f9c3",
+    "anchors": "2e1f6026187ae5b6d3187223c71b5c5642b7b118f296d3be04ee1f2063501113",
+    "source_weight": "travel_time",
+    "source_unit": "seconds",
+    "mode": "drive",
+    "method": "networkx_dijkstra",
+    "connector_time": "excluded"
+  },
+  "unreachable_pairs": 0,
+  "assumptions": {
+    "default_floors": 1,
+    "living_area_coefficient": 0.9,
+    "living_area_per_person_m2": 30.0,
+    "school_demand_per_1000": 120,
+    "school_accessibility_min": 15,
+    "provision_max_depth": 1,
+    "provision_self_supply": true,
+    "spacematrix_n_clusters": 11,
+    "random_state": 42,
+    "school_capacity_missing": "minimum_typical_from_blocksnet_config",
+    "accessibility_weights": "destination_block_site_area",
+    "connector_time": "excluded"
+  },
+  "quality_checks_needing_review": [
+    "Здания с неизвестным назначением",
+    "Здания с восстановленной этажностью",
+    "Школы с модельной вместимостью",
+    "Длинные привязки к сети"
+  ],
+  "manual_route_pairs_checked": 0,
+  "observations": [],
+  "sources": {
+    "osm": "https://www.openstreetmap.org/copyright",
+    "pipeline": "https://github.com/aimclub/blocksnet/blob/v1.0.0.a9/examples/pipeline.ipynb"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "signature": "6c793d3ee105a4e2ceca5185d271875b7462fe52f08cdbe8aed1ef4e613a55d4",
+  "parameters": {
+    "boundary": "5d0d635934126b324892b838344ebfe4262da0078e20a3d41d8aec72d8af4a5a",
+    "roads": "12edc2a97e2d374db92c6b56e1d903e4a13d98bf08033db9baa61d61230579fc",
+    "railways": "5d2a3c294ef135b81b95d30835738d141499ebf0116cca6f043b47d3498d936b",
+    "water": "35c37da8c1bd9b427cf50044aaa68842acc11cda0b91868dd16e0a360d1fcacd"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-11-07T09:55:17.866875+00:00"
+}

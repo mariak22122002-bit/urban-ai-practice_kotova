@@ -1,0 +1,32 @@
+{
+  "signature": "74dd1c15c6a6a4b34590eefd553396f923149a649165c6b1679b0f93f42e7e8a",
+  "parameters": {
+    "blocks": "32deec3e34b77c0ea3a74040362ba189a6cec52f892718c325333ef6be204c94",
+    "graph": "6248c068720bd17682fddc5345923e8fd19131f41797041545562ef3d606f9c3",
+    "anchors": "2e1f6026187ae5b6d3187223c71b5c5642b7b118f296d3be04ee1f2063501113",
+    "source_weight": "travel_time",
+    "source_unit": "seconds",
+    "mode": "drive",
+    "method": "networkx_dijkstra",
+    "connector_time": "excluded"
+  },
+  "files": {
+    "minutes": "travel_minutes.csv"
+  },
+  "sha256": {
+    "minutes": "9fee346d864293b289733c9c64c0a922899dcae0b9106cb33c81f91fa079412b"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-11-07T12:34:19.266246+00:00"
+}

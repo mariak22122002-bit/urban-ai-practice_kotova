@@ -1,0 +1,32 @@
+{
+  "signature": "c5a1f53e51c45085a62a831b2eae03368bac49a956c48b2cd735bbb8ef7fe147",
+  "parameters": {
+    "model": "1858443f2749e4dc8f35d298a31c42d2eaa52b910d0c12ef2ffb5eb6177563b2",
+    "matrix": "9fee346d864293b289733c9c64c0a922899dcae0b9106cb33c81f91fa079412b",
+    "time_min": 15,
+    "demand_per_1000": 120,
+    "max_depth": 1,
+    "self_supply": true
+  },
+  "files": {
+    "blocks": "provision_blocks.csv",
+    "links": "provision_links.csv"
+  },
+  "sha256": {
+    "blocks": "3672c1bbaf4cd7208e62ea3cf0bfe1165b3a3f551145e52651951263831d21e8",
+    "links": "d47ce3a00de7bcbefdd22d06875eebd393a649b7fd0fe87e14ac63a119088784"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-11-07T12:34:39.019518+00:00"
+}

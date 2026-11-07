@@ -33,6 +33,10 @@ instance/
 
 # Environments
 .env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
 .venv/
 venv/
 ENV/
@@ -42,3 +46,30 @@ ENV/
 
 # PyCharm env
 .idea
+
+# Local editor and macOS files
+.vscode/
+.DS_Store
+._*
+
+# Download and tool caches
+cache/
+osmnx_cache/
+.ruff_cache/
+
+# Temporary files and local backups
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+*.backup.*
+
+# Local credentials and private keys
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json

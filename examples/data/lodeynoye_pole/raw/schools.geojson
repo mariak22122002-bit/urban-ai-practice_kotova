@@ -1,0 +1,471 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "addr:housenumber": "26",
+        "addr:street": "проспект Ленина",
+        "amenity": "school",
+        "email": "dhsh5lp@yandex.ru",
+        "name": "Детская художественная школа №5",
+        "phone": "+78136425374",
+        "website": "http://dhsch.ru/",
+        "addr:city": null,
+        "building": null,
+        "building:cladding": null,
+        "building:levels": null,
+        "check_date": null,
+        "contact:vk": null,
+        "design:code:SPb": null,
+        "fax": null,
+        "grades": null,
+        "religion": null,
+        "addr:postcode": null,
+        "building:architecture": null,
+        "design:ref": null,
+        "name:ru": null,
+        "education": null,
+        "type": null,
+        "osm_type": "node",
+        "osm_id": "381843073"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.545304,
+          60.7348138
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "addr:housenumber": "54А",
+        "addr:street": "проспект Ленина",
+        "amenity": "school",
+        "email": null,
+        "name": null,
+        "phone": null,
+        "website": null,
+        "addr:city": "Лодейное Поле",
+        "building": "yes",
+        "building:cladding": "brick",
+        "building:levels": "2",
+        "check_date": null,
+        "contact:vk": null,
+        "design:code:SPb": null,
+        "fax": null,
+        "grades": null,
+        "religion": null,
+        "addr:postcode": null,
+        "building:architecture": null,
+        "design:ref": null,
+        "name:ru": null,
+        "education": null,
+        "type": "multipolygon",
+        "osm_type": "relation",
+        "osm_id": "9093198"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              33.5364329,
+              60.7359073
+            ],
+            [
+              33.5364246,
+              60.7363322
+            ],
+            [
+              33.5366727,
+              60.7363315
+            ],
+            [
+              33.5366818,
+              60.7359067
+            ],
+            [
+              33.5364329,
+              60.7359073
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "addr:housenumber": "5",
+        "addr:street": "улица Карла Маркса",
+        "amenity": "school",
+        "email": "school3lpole@yandex.ru",
+        "name": "Средняя общеобразовательная школа №3",
+        "phone": "+78136421963",
+        "website": "https://school3-lp.ru/",
+        "addr:city": "Лодейное Поле",
+        "building": "school",
+        "building:cladding": "panel",
+        "building:levels": "3",
+        "check_date": "2025-11-24",
+        "contact:vk": "https://vk.com/school3hero",
+        "design:code:SPb": "Шк-30",
+        "fax": "+78136425450",
+        "grades": "1-11",
+        "religion": "none",
+        "addr:postcode": null,
+        "building:architecture": null,
+        "design:ref": null,
+        "name:ru": null,
+        "education": null,
+        "type": null,
+        "osm_type": "way",
+        "osm_id": "33500861"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              33.5524619,
+              60.7371156
+            ],
+            [
+              33.5524589,
+              60.7374206
+            ],
+            [
+              33.5526869,
+              60.7374206
+            ],
+            [
+              33.5526839,
+              60.7377416
+            ],
+            [
+              33.5530379,
+              60.7377416
+            ],
+            [
+              33.5530379,
+              60.7373826
+            ],
+            [
+              33.5534579,
+              60.7373826
+            ],
+            [
+              33.5534579,
+              60.7371616
+            ],
+            [
+              33.5530499,
+              60.7371616
+            ],
+            [
+              33.5530539,
+              60.7367796
+            ],
+            [
+              33.5527259,
+              60.7367796
+            ],
+            [
+              33.5527259,
+              60.7371156
+            ],
+            [
+              33.5525939,
+              60.7371156
+            ],
+            [
+              33.5524619,
+              60.7371156
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "addr:housenumber": "2",
+        "addr:street": "улица Свердлова",
+        "amenity": "school",
+        "email": "school1lp@yandex.ru",
+        "name": "Лодейнопольская школа № 1",
+        "phone": "+78136421953",
+        "website": "http://www.school1lp.ru/",
+        "addr:city": "Лодейное Поле",
+        "building": "school",
+        "building:cladding": "plaster",
+        "building:levels": "2",
+        "check_date": null,
+        "contact:vk": null,
+        "design:code:SPb": null,
+        "fax": null,
+        "grades": "1-9",
+        "religion": "none",
+        "addr:postcode": "187700",
+        "building:architecture": "stalinist_neoclassicism",
+        "design:ref": null,
+        "name:ru": null,
+        "education": null,
+        "type": null,
+        "osm_type": "way",
+        "osm_id": "33500972"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              33.5554894,
+              60.7268861
+            ],
+            [
+              33.5554951,
+              60.7268012
+            ],
+            [
+              33.5558512,
+              60.7268069
+            ],
+            [
+              33.5558395,
+              60.7269804
+            ],
+            [
+              33.5561881,
+              60.726986
+            ],
+            [
+              33.5561991,
+              60.7268236
+            ],
+            [
+              33.556448,
+              60.7268276
+            ],
+            [
+              33.5564403,
+              60.7269418
+            ],
+            [
+              33.5567088,
+              60.7269461
+            ],
+            [
+              33.556725,
+              60.7267044
+            ],
+            [
+              33.55534,
+              60.7266821
+            ],
+            [
+              33.5553265,
+              60.7268834
+            ],
+            [
+              33.5554894,
+              60.7268861
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "addr:housenumber": "54",
+        "addr:street": "проспект Ленина",
+        "amenity": "school",
+        "email": null,
+        "name": "Средняя общеобразовательная школа № 2",
+        "phone": "+78136425501",
+        "website": "https://school2-lp.3dn.ru/",
+        "addr:city": "Лодейное Поле",
+        "building": "school",
+        "building:cladding": "brick",
+        "building:levels": "4",
+        "check_date": null,
+        "contact:vk": null,
+        "design:code:SPb": null,
+        "fax": null,
+        "grades": null,
+        "religion": null,
+        "addr:postcode": null,
+        "building:architecture": null,
+        "design:ref": "2ЛГ-02-2",
+        "name:ru": "Средняя школа № 2",
+        "education": null,
+        "type": null,
+        "osm_type": "way",
+        "osm_id": "33501160"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              33.5356549,
+              60.7356435
+            ],
+            [
+              33.5356526,
+              60.7353967
+            ],
+            [
+              33.5364391,
+              60.7353949
+            ],
+            [
+              33.5364329,
+              60.7359073
+            ],
+            [
+              33.5366818,
+              60.7359067
+            ],
+            [
+              33.5366879,
+              60.7353957
+            ],
+            [
+              33.5366235,
+              60.7353959
+            ],
+            [
+              33.5366219,
+              60.7352224
+            ],
+            [
+              33.535343,
+              60.7352363
+            ],
+            [
+              33.5353422,
+              60.7352498
+            ],
+            [
+              33.5353391,
+              60.7353032
+            ],
+            [
+              33.5353373,
+              60.735335
+            ],
+            [
+              33.5353346,
+              60.7353806
+            ],
+            [
+              33.5353677,
+              60.7353802
+            ],
+            [
+              33.5353576,
+              60.7356434
+            ],
+            [
+              33.5356549,
+              60.7356435
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "addr:housenumber": "48",
+        "addr:street": "улица Титова",
+        "amenity": "school",
+        "email": null,
+        "name": "Средняя общеобразовательная школа №68",
+        "phone": null,
+        "website": null,
+        "addr:city": "Лодейное Поле",
+        "building": "school",
+        "building:cladding": "plaster",
+        "building:levels": "3",
+        "check_date": null,
+        "contact:vk": null,
+        "design:code:SPb": null,
+        "fax": null,
+        "grades": null,
+        "religion": null,
+        "addr:postcode": null,
+        "building:architecture": null,
+        "design:ref": null,
+        "name:ru": null,
+        "education": null,
+        "type": null,
+        "osm_type": "way",
+        "osm_id": "33501490"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              33.5481703,
+              60.7327688
+            ],
+            [
+              33.5481703,
+              60.7325248
+            ],
+            [
+              33.5485483,
+              60.7325248
+            ],
+            [
+              33.5485483,
+              60.7327648
+            ],
+            [
+              33.5488833,
+              60.7327648
+            ],
+            [
+              33.5488833,
+              60.7325248
+            ],
+            [
+              33.5492463,
+              60.7325248
+            ],
+            [
+              33.5492493,
+              60.7325778
+            ],
+            [
+              33.5494863,
+              60.7325778
+            ],
+            [
+              33.5494863,
+              60.7324138
+            ],
+            [
+              33.5479263,
+              60.7324218
+            ],
+            [
+              33.5479303,
+              60.7327728
+            ],
+            [
+              33.5481703,
+              60.7327688
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

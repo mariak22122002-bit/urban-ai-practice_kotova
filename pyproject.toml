@@ -45,6 +45,8 @@ dev = [ # зависимости, необходимые для разработ
     "pre-commit>=3.1",          # Интеграция хуков для автоформатирования
     "build",                    # Сборка пакета для публикации
     "twine",                    # Публикация пакета на PyPI
+    "blocksnet==1.0.0a9",       # Моделирование города (https://github.com/aimclub/blocksnet)
+    "matplotlib>=3.9.0,<4.0.0", # Отрисовка карт и графиков в ноутбуке
 ]
 
 tests = [ # зависимости, необходимые для тестирования библиотеки
@@ -91,3 +93,6 @@ lines_after_imports = 2
 multi_line_output = 3
 line_length = 120
 include_trailing_comma = true
+
+
+  

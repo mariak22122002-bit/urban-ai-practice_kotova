@@ -1,0 +1,38 @@
+{
+  "signature": "d3b60ca1516a89b5626fdc95b024ed46dc89a493a724dd2a17f163a2b30bb11e",
+  "parameters": {
+    "blocks": "32deec3e34b77c0ea3a74040362ba189a6cec52f892718c325333ef6be204c94",
+    "zones": "e53e6d7cc3116700af0a96a4ab51e8316631dd2d0f6aa0fddd56832643c76147",
+    "rules": {
+      "commercial": "business",
+      "retail": "business",
+      "industrial": "industrial",
+      "garages": "industrial",
+      "brownfield": "industrial",
+      "cemetery": "special",
+      "construction": "special",
+      "religious": "special",
+      "military": "special",
+      "residential": "residential",
+      "grass": "recreation",
+      "forest": "recreation",
+      "recreation_ground": "recreation",
+      "flowerbed": "recreation",
+      "farmland": "agriculture",
+      "landfill": "transport"
+    }
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-11-07T10:29:09.410328+00:00"
+}

@@ -1,0 +1,51 @@
+{
+  "signature": "e1ba2fb474d361df07060f1f6fae7065517c4adc52f7ae71e672765c5848428b",
+  "parameters": {
+    "boundary": "5d0d635934126b324892b838344ebfe4262da0078e20a3d41d8aec72d8af4a5a",
+    "tags": {
+      "highway": [
+        "construction",
+        "crossing",
+        "living_street",
+        "motorway",
+        "motorway_link",
+        "motorway_junction",
+        "pedestrian",
+        "primary",
+        "primary_link",
+        "raceway",
+        "residential",
+        "road",
+        "secondary",
+        "secondary_link",
+        "services",
+        "tertiary",
+        "tertiary_link",
+        "track",
+        "trunk",
+        "trunk_link",
+        "turning_circle",
+        "turning_loop",
+        "unclassified"
+      ],
+      "service": [
+        "living_street",
+        "emergency_access"
+      ]
+    },
+    "source": "OpenStreetMap"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-10-28T20:55:52.492842+00:00"
+}

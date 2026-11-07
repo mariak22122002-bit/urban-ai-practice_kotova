@@ -1,0 +1,29 @@
+{
+  "signature": "126fabc77e063f64bd27077847128b5efdbbdc76966105a856a8f1cf182f8260",
+  "parameters": {
+    "density": "93b078e2319b286dd7b56ec36fb759db36db68657654ff30f6839fb7c114f5ea",
+    "k": 11,
+    "seed": 42
+  },
+  "files": {
+    "blocks": "morphotypes_blocks.csv",
+    "clusters": "morphotypes_clusters.csv"
+  },
+  "sha256": {
+    "blocks": "39211f6dbd2a97d17a65e48c2b3d117db4e497f1e4038e87a2209fd4a02520a6",
+    "clusters": "712e4ad84963e56445812ce405cea6559d70f1cd7ff30b158aca0771372b45f2"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-11-07T11:03:26.942964+00:00"
+}

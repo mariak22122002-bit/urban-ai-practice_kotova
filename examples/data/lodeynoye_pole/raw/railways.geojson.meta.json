@@ -1,0 +1,23 @@
+{
+  "signature": "1b042312377d3fd908b4bd5072a2a9ad6617ebddd179039519d3414bc9b66618",
+  "parameters": {
+    "boundary": "5d0d635934126b324892b838344ebfe4262da0078e20a3d41d8aec72d8af4a5a",
+    "tags": {
+      "railway": "rail"
+    },
+    "source": "OpenStreetMap"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-10-28T21:05:33.253077+00:00"
+}

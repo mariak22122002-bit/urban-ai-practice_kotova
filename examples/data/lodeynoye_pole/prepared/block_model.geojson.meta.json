@@ -1,0 +1,22 @@
+{
+  "signature": "ba0070da702bacf66f9ed3cf616916f632b415b236a77a5b7f4e321529b41cb0",
+  "parameters": {
+    "blocks": "32deec3e34b77c0ea3a74040362ba189a6cec52f892718c325333ef6be204c94",
+    "land_use": "e1aeb29df23f1661ac13e53c313bcfafa158cf2451d9d21d558b9ac1b723c81a",
+    "buildings": "13235c8a7d3055114adad13536e085329aaa8e6f3c6d3171239be9efdf461e86",
+    "schools": "1ad807348ab6c3641c251bc621178a8108fac8c0075160d4c2b12b36f8fa4e07"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-11-07T11:01:23.596279+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "signature": "751eabef283c7c9dc036d60aa1a0312b6c5f78079ba709b532101bfce4518064",
+  "parameters": {
+    "boundary": "5d0d635934126b324892b838344ebfe4262da0078e20a3d41d8aec72d8af4a5a",
+    "tags": {
+      "riverbank": true,
+      "reservoir": true,
+      "basin": true,
+      "dock": true,
+      "canal": true,
+      "pond": true,
+      "natural": [
+        "water",
+        "bay"
+      ],
+      "waterway": [
+        "river",
+        "canal",
+        "ditch"
+      ],
+      "landuse": "basin",
+      "water": "lake"
+    },
+    "source": "OpenStreetMap"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-11-07T09:52:30.671174+00:00"
+}

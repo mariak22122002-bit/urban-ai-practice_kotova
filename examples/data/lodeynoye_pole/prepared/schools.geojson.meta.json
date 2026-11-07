@@ -1,0 +1,20 @@
+{
+  "signature": "089a05a0d36ccd6c1ec839200ecdad95b74ec220ae63ab6c1f4dc74c26a3b5a8",
+  "parameters": {
+    "raw": "548e378895094022886aa0790e79c3672c9269734097d50b70b0575a8f875323",
+    "deduplication": "geometry-and-contained-identical-name-or-ref"
+  },
+  "software": {
+    "blocksnet": "1.0.0a9",
+    "geopandas": "1.2.0",
+    "osmnx": "2.1.1",
+    "networkx": "3.6.1",
+    "pandas": "2.3.3",
+    "numpy": "2.2.6",
+    "scipy": "1.17.1",
+    "shapely": "2.2.0",
+    "scikit-learn": "1.9.1",
+    "PuLP": "2.7.0"
+  },
+  "saved_at_utc": "2026-11-07T11:00:40.688848+00:00"
+}
