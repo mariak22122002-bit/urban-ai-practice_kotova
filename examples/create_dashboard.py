@@ -17,6 +17,8 @@ from pathlib import Path
 from statistics import fmean, stdev
 from typing import Any
 
+from shapely.geometry import shape
+
 # Пути работают независимо от текущей рабочей директории терминала.
 EXAMPLES_DIR = Path(__file__).resolve().parent
 DATA_DIR = EXAMPLES_DIR / "data" / "lodeynoye_pole"
@@ -200,21 +202,6 @@ def polygon_rings(geometry: dict[str, Any]) -> list[list[list[float]]]:
     if kind == "MultiPolygon":
         return [ring for polygon in coords for ring in polygon if ring]
     return []
-
-
-def quality_cards() -> str:
-    """Показываем сохранённые проверки качества без выдуманных цифр."""
-    path = RESULTS_DIR / "quality_checks.csv"
-    if not path.is_file():
-        return '<div class="quality-item"><span>Файл quality_checks.csv не найден</span></div>'
-    with path.open(newline="", encoding="utf-8-sig") as stream:
-        items = list(csv.DictReader(stream))
-    mapping = {item.get("check", "").strip(): item.get("value", "—") for item in items}
-    return "".join(
-        '<div class="quality-item"><strong>' + html.escape(str(mapping.get(key, "—"))) +
-        '</strong><span>' + html.escape(label) + '</span></div>'
-        for key, label in ((item.get('check', ''), item.get('check', '')) for item in items)
-    )
 
 
 def audit_results(features: list[dict[str, Any]], summary: dict[str, Any]) -> None:
@@ -416,7 +403,7 @@ def saved_tables_html(summary: dict[str, Any], features: list[dict[str, Any]]) -
 
 
 def school_details_html() -> str:
-    """Display the actual saved school list, including imputation and review issues."""
+    """Display the saved school list and imputed capacities."""
     path = DATA_DIR / 'prepared/schools.geojson'
     if not path.is_file():
         return '<p>Сохранённый список школ отсутствует.</p>'
@@ -427,10 +414,6 @@ def school_details_html() -> str:
         name = p.get('name') or f"Без названия, OSM {p.get('osm_id', '—')}"
         parts.append(f'<li>{html.escape(str(name))}: {html.escape(str(p.get("capacity", "—")))} мест</li>')
     parts.append('</ul>')
-    if any('художествен' in str(p.get('name', '')).lower() for p in schools):
-        parts.append('<p class="callout">В этом сохранённом снимке есть художественная школа. '
-                      'Для сценария общеобразовательных школ выполните analysis-imports, school-scenario '
-                      'и зависимые ячейки разделов 4.3–4.4, 5–6, 9–13 ноутбука.</p>')
     return ''.join(parts)
 
 
@@ -450,7 +433,9 @@ def method_html(summary: dict[str, Any]) -> str:
         ('Дата создания / получения графа', created), ('Дата снимка OSM', date),
         ('Проверено маршрутов вручную', summary.get('manual_route_pairs_checked', 0)),
     ]
-    return ('<article class="card method-card"><h3>Источники и допущения</h3><ul>' + ''.join(
+    return ('<article class="card method-card"><h3>Источники и допущения</h3>'
+            '<p>Часть характеристик зданий и вместимость школ оценены по допущениям модели. '
+            'Результаты предназначены для учебного сравнения кварталов.</p><ul>' + ''.join(
         f'<li>{html.escape(key)}: {html.escape(str(value))}</li>' for key, value in rows
     ) + '</ul><p>Площадная доступность = Σ(время из квартала × площадь назначения) / Σ(площадь назначения). '
         'Меньше минут означает меньшие затраты времени; это не среднее по жителям. '
@@ -517,6 +502,28 @@ def make_dataset(features: list[dict[str, Any]], summary: dict[str, Any]) -> dic
     if len(set(ids)) != len(ids):
         raise ValueError('В GeoJSON повторяются значения block_id')
 
+    # Одна точка на школу; среднее вершин квартала может попасть в соседний квартал.
+    block_geometries = [(int(normalise_id(f['properties']['block_id'])), shape(f['geometry']))
+                        for f in features]
+    schools = []
+    for index, feature in enumerate(read_json(DATA_DIR / 'prepared/schools.geojson')['features']):
+        point = shape(feature['geometry']).representative_point()
+        matches = [bid for bid, geometry in block_geometries if geometry.intersects(point)]
+        props = feature.get('properties') or {}
+        school_id = props.get('school_id') or f'school_{index}'
+        if len(matches) != 1:
+            raise ValueError(f'Школа {school_id}: не удалось однозначно определить квартал: {matches}')
+        x, y = project(point.x, point.y)
+        schools.append({
+            'id': school_id, 'block_id': matches[0],
+            'cx': round(x, 3), 'cy': round(y, 3),
+            'name': props.get('name') or 'Школа без названия',
+        })
+    school_counts = Counter(school['block_id'] for school in schools)
+    for row in rows:
+        if school_counts[row['id']] != row['p']['school_count']:
+            raise ValueError(f"Квартал {row['id']}: точки школ не совпадают с сохранённым school_count")
+
     land_count = Counter(row["p"].get("land_use") for row in rows)
     def numeric_values(key: str) -> list[float]:
         return [float(row["p"][key]) for row in rows
@@ -546,7 +553,7 @@ def make_dataset(features: list[dict[str, Any]], summary: dict[str, Any]) -> dic
     for key, entry in dictionary.items():
         labels[key] = entry['label']
         units[key] = entry['unit']
-    return {'blocks': rows, 'labels': labels, 'units': units, 'summary': summary,
+    return {'blocks': rows, 'schools': schools, 'labels': labels, 'units': units, 'summary': summary,
             'landNames': {str(k):v for k,v in LAND_NAMES.items()},
             'morphNames': {str(k):v for k,v in MORPH_NAMES.items()},
             'counts': counts}
@@ -570,11 +577,12 @@ main{padding-top:34px;padding-bottom:70px}section{scroll-margin-top:85px;margin-
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}.chart-card{padding:25px}.chart-card h3{font-size:18px;letter-spacing:-.015em;margin:0 0 3px}.chart-caption{font-size:12px;color:#71827c;margin:0 0 24px}.bar-item{display:grid;grid-template-columns:minmax(0,175px) 1fr 47px;align-items:center;gap:11px;margin:13px 0}.bar-item label{font-size:12px;color:#49595e;line-height:1.25}.bar-track{height:12px;border-radius:5px;background:#edf1ef;overflow:hidden}.bar-fill{height:100%;border-radius:5px}.bar-number{font-variant-numeric:tabular-nums;text-align:right;color:#34464a;font-weight:750;font-size:12px}.chart-foot{color:#84918e;font-size:11px;margin-top:16px;padding-top:13px;border-top:1px solid var(--line)}.hist-svg{width:100%;height:auto;display:block}.hist-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;color:#526460;font-size:12px}.hist-title strong{color:#153d3d}.hist-range{display:flex;justify-content:space-between;color:#88948e;font-size:11px;margin-top:4px}.metric-note{font-size:12px;color:#667871;line-height:1.6}.access-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.toplist{display:grid;grid-template-columns:1fr 1fr;gap:10px}.topline{display:flex;justify-content:space-between;border-bottom:1px dashed #e0e9e5;padding:9px 0;gap:8px;font-size:12px}.topline span{color:#6b7b76}.topline strong{color:#285b55;font-variant-numeric:tabular-nums}.chart-bottom{margin-top:15px;font-size:12px;color:#74817e}
 .school-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.comparison{padding:27px}.compare-row{margin:18px 0}.compare-label{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px;color:#63726d}.compare-label strong{font-size:18px;color:#244d49}.compare-track{height:14px;background:#eff2f0;border-radius:9px;overflow:hidden}.compare-track i{height:100%;display:block;border-radius:9px}.callout{background:#f6ebe2;border-left:3px solid #bb825f;border-radius:0 9px 9px 0;padding:12px 15px;color:#69584c;font-size:12px;line-height:1.7;margin-top:20px}
 .data-card{overflow:hidden}.table-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:17px 20px;border-bottom:1px solid var(--line)}.table-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.table-actions select{min-width:210px}.table-tools input{width:210px}.btn{padding:9px 13px;border:1px solid #d5e2dc;border-radius:9px;background:#fff;color:#2f6560;font-weight:700;font-size:12px}.btn:hover{background:#edf6f2}.btn.primary{background:#275e57;border-color:#275e57;color:#fff}.btn.primary:hover{background:#1c4943}.table-scroll{overflow:auto;max-height:570px}table{border-collapse:collapse;min-width:100%;width:100%;font-size:12px;text-align:left}th{background:#f2f6f3;color:#65756d;text-transform:uppercase;letter-spacing:.05em;font-size:10px;position:sticky;top:0;z-index:2;white-space:nowrap}th,td{border-bottom:1px solid #e8ede8;padding:12px 13px}tr:hover td{background:#f2f8f5}td.num{font-variant-numeric:tabular-nums;text-align:right}td:first-child{font-weight:750;color:#235851;cursor:pointer}.table-status{padding:11px 20px;font-size:11px;color:#86928c;background:#fafcfb;border-top:1px solid var(--line)}
-.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.method-card{padding:26px}.method-card h3{margin:0 0 13px;font-size:18px}.method-card p{color:#687872;margin:0 0 12px;line-height:1.7}.method-card ul{padding-left:19px;color:#64736e;margin:0}.method-card li{margin:10px 0}.quality-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:15px}.quality-item{padding:17px;border:1px solid #e6ebe8;border-radius:11px;background:#fff}.quality-item strong{font-size:24px;display:block;color:#2a5551;letter-spacing:-.03em}.quality-item span{font-size:11px;color:#77847e}
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.method-card{padding:26px}.method-card h3{margin:0 0 13px;font-size:18px}.method-card p{color:#687872;margin:0 0 12px;line-height:1.7}.method-card ul{padding-left:19px;color:#64736e;margin:0}.method-card li{margin:10px 0}
 .foot{border-top:1px solid #dce4de;padding:27px 0 40px;color:#7a8b84;font-size:12px}.foot-in{display:flex;justify-content:space-between;gap:12px}.live-note{margin:11px 0 0;font-size:11px;color:#81928d}.mini-dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:#4e9d83;margin-right:7px}
-@media(max-width:1100px){.atlas-layout{grid-template-columns:1fr}.map-side{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr}.stat-grid{grid-template-columns:repeat(2,1fr)}.hero-in{grid-template-columns:1.5fr 1fr}.map-shell,.map-shell svg{height:480px}.quality-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:760px){.max{padding:0 16px}.hero-in{padding:38px 16px;grid-template-columns:1fr;gap:19px}.hero h1{font-size:38px}.hero p{font-size:14px}.top-r .source-chip{display:none}.stat-grid,.info-grid,.two-col,.access-grid,.school-grid,.method-grid{grid-template-columns:1fr}.atlas-toolbar{padding:14px}.field,.field.small{flex-basis:100%;min-width:100%}.atlas-layout{display:block}.map-side{display:block}.map-side>div{margin-bottom:18px}.map-shell,.map-shell svg{height:375px}.map-hint{font-size:10px;bottom:8px;left:9px}.section-top{display:block}.section-top p{margin-top:8px}.bar-item{grid-template-columns:110px 1fr 30px}.toplist{grid-template-columns:1fr}.table-tools input,.table-actions select{width:100%}.table-tools,.table-actions{width:100%}.quality-grid{grid-template-columns:repeat(2,1fr)}.foot-in{flex-direction:column}}
+@media(max-width:1100px){.atlas-layout{grid-template-columns:1fr}.map-side{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr}.stat-grid{grid-template-columns:repeat(2,1fr)}.hero-in{grid-template-columns:1.5fr 1fr}.map-shell,.map-shell svg{height:480px}}
+@media(max-width:760px){.max{padding:0 16px}.hero-in{padding:38px 16px;grid-template-columns:1fr;gap:19px}.hero h1{font-size:38px}.hero p{font-size:14px}.top-r .source-chip{display:none}.stat-grid,.info-grid,.two-col,.access-grid,.school-grid,.method-grid{grid-template-columns:1fr}.atlas-toolbar{padding:14px}.field,.field.small{flex-basis:100%;min-width:100%}.atlas-layout{display:block}.map-side{display:block}.map-side>div{margin-bottom:18px}.map-shell,.map-shell svg{height:375px}.map-hint{font-size:10px;bottom:8px;left:9px}.section-top{display:block}.section-top p{margin-top:8px}.bar-item{grid-template-columns:110px 1fr 30px}.toplist{grid-template-columns:1fr}.table-tools input,.table-actions select{width:100%}.table-tools,.table-actions{width:100%}.foot-in{flex-direction:column}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.layer-toggle{display:flex;align-items:center;gap:9px;margin-top:16px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fafcfb;color:var(--ink2);font-size:13px;cursor:pointer}.layer-toggle input{width:16px;height:16px;margin:0;accent-color:#47746b;cursor:pointer}.school-symbol{width:9px;height:9px;border-radius:50%;background:#e5a96b;flex:none}
 </style>
 </head>
 <body>
@@ -583,13 +591,15 @@ main{padding-top:34px;padding-bottom:70px}section{scroll-margin-top:85px;margin-
 <nav class="nav"><div class="max nav-in"><a href="#overview">Обзор</a><a href="#atlas">Атлас</a><a href="#structure">Городская ткань</a><a href="#mobility">Доступность</a><a href="#schools">Школы</a><a href="#data">Все данные</a><a href="#details">Расчётные таблицы</a><a href="#method">Методика</a></div></nav>
 <main class="max">
 <section id="overview"><div class="section-top"><div><div class="section-label">01 · Портрет города</div><h2>Ключевые показатели</h2></div><p>Краткий обзор на уровне кварталов. В расчётах использованы оценки, а не официальная статистика населения и школьной вместимости.</p></div><div class="stat-grid"><div class="card stat"><span class="sub">Городские кварталы</span><strong id="s-blocks">—</strong><small>выделены на основе дорожной и водной сети</small></div><div class="card stat"><span class="sub">Площадь кварталов</span><strong id="s-area">—</strong><small>сумма геометрий кварталов</small></div><div class="card stat"><span class="sub">Модельное население</span><strong id="s-pop">—</strong><small>оценка по данным OSM о зданиях</small></div><div class="card stat"><span class="sub">Среднее время по сети</span><strong id="s-time">—</strong><small>модельная площадьно-взвешенная доступность</small></div></div><div class="info-grid"><article class="card insight"><div class="line-tag">Городская структура</div><h3>Жилая функция — основа квартальной сети</h3><p id="intro-structure"><span id="intro-structure-text">Доля жилых кварталов и пропусков классификации рассчитывается по сохранённым данным.</span></p></article><article class="card insight warning"><div class="line-tag">Ограничение данных</div><h3>Результаты — учебная модель</h3><p>Скорости автомобилей, этажность части зданий и вместимость школ оценивались. Числа подходят для сравнения кварталов внутри модели, но не заменяют полевые исследования и официальную статистику.</p></article></div></section>
-<section id="atlas"><div class="section-top"><div><div class="section-label">02 · Картографический атлас</div><h2>Сравните кварталы на карте</h2></div><p>Выберите показатель и задайте фильтры. Нажмите на квартал, чтобы посмотреть подробности. Карта работает без подключения к интернету.</p></div><div class="card atlas-card"><div class="atlas-toolbar"><div class="field" style="flex:1.45"><label for="metric">Показатель на карте</label><select id="metric"></select></div><div class="field small"><label for="lu-filter">Функция</label><select id="lu-filter"></select></div><div class="field small"><label for="morph-filter">Морфотип</label><select id="morph-filter"></select></div><button class="reset" id="reset-filters">Сбросить фильтры</button></div><div class="atlas-layout"><div class="map-shell" id="map-shell"><svg id="atlas-svg" viewBox="0 0 970 590" role="img" aria-label="Интерактивная карта кварталов Лодейного Поля"><g id="map-layer"></g><g id="school-layer"></g></svg><div class="map-controls"><button id="zoom-in" class="map-btn" title="Приблизить" aria-label="Приблизить">+</button><button id="zoom-out" class="map-btn" title="Отдалить" aria-label="Отдалить">−</button><button id="zoom-reset" class="map-btn" title="Исходный вид" aria-label="Исходный вид">⌖</button></div><div class="map-tip" id="map-tip"></div><div class="map-hint">Колесо — масштаб · перетаскивание — сдвиг · нажать — детали</div></div><aside class="map-side"><div><div class="side-topline"><div class="side-head">Условные обозначения</div><span class="small-muted" id="map-count">— / —</span></div><div class="legend-list" id="legend"></div><p class="small-muted" style="margin:15px 0 0;line-height:1.5"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e5a96b;margin-right:7px"></span>Оранжевые точки — кварталы со школьными объектами</p></div><div class="divider"></div><div><div class="side-head">Выбранный квартал</div><h3 class="selected-title" id="selected-title">Выберите квартал</h3><div class="side-data" id="selected-data"><span>Нажмите на квартал на карте, чтобы увидеть его характеристики</span></div><div class="selected-note" id="selected-note" style="margin-top:17px">Числовые показатели описывают модель, а не фактическое время поездки или официальную обеспеченность населения.</div></div></aside></div></div></section>
+<section id="atlas"><div class="section-top"><div><div class="section-label">02 · Картографический атлас</div><h2>Сравните кварталы на карте</h2></div><p>Выберите показатель и задайте фильтры. Нажмите на квартал, чтобы посмотреть подробности. Карта работает без подключения к интернету.</p></div><div class="card atlas-card"><div class="atlas-toolbar"><div class="field" style="flex:1.45"><label for="metric">Показатель на карте</label><select id="metric"></select></div><div class="field small"><label for="lu-filter">Функция</label><select id="lu-filter"></select></div><div class="field small"><label for="morph-filter">Морфотип</label><select id="morph-filter"></select></div><button class="reset" id="reset-filters">Сбросить фильтры</button></div><div class="atlas-layout"><div class="map-shell" id="map-shell"><svg id="atlas-svg" viewBox="0 0 970 590" role="img" aria-label="Интерактивная карта кварталов Лодейного Поля"><g id="map-layer"></g><g id="school-layer"></g></svg><div class="map-controls"><button id="zoom-in" class="map-btn" title="Приблизить" aria-label="Приблизить">+</button><button id="zoom-out" class="map-btn" title="Отдалить" aria-label="Отдалить">−</button><button id="zoom-reset" class="map-btn" title="Исходный вид" aria-label="Исходный вид">⌖</button></div><div class="map-tip" id="map-tip"></div><div class="map-hint">Колесо — масштаб · перетаскивание — сдвиг · нажать — детали</div></div><aside class="map-side"><div><div class="side-topline"><div class="side-head">Условные обозначения</div><span class="small-muted" id="map-count">— / —</span></div><div class="legend-list" id="legend"></div>
+<label class="layer-toggle" for="show-schools"><input id="show-schools" type="checkbox" checked aria-controls="school-layer"><span class="school-symbol" aria-hidden="true"></span><span>Показывать школы</span></label>
+</div><div class="divider"></div><div><div class="side-head">Выбранный квартал</div><h3 class="selected-title" id="selected-title">Выберите квартал</h3><div class="side-data" id="selected-data"><span>Нажмите на квартал на карте, чтобы увидеть его характеристики</span></div><div class="selected-note" id="selected-note" style="margin-top:17px">Числовые показатели описывают модель, а не фактическое время поездки или официальную обеспеченность населения.</div></div></aside></div></div></section>
 <section id="structure"><div class="section-top"><div><div class="section-label">03 · Городская ткань</div><h2>Функции и морфология</h2></div><p>Классификации показаны по числу кварталов. Фильтры карты влияют на диаграммы; обзор города и паспорт показывают весь набор.</p></div><div class="two-col"><article class="card chart-card"><h3>Использование территории</h3><div id="land-bars"></div><p class="metric-note">Отсутствующая функция — отдельная категория.</p></article><article class="card chart-card"><h3>Морфотипы Strelka</h3><div id="morph-bars"></div><p class="metric-note">Морфотипы описывают застройку и не являются оценкой качества среды.</p></article><article class="card chart-card"><h3>Морфотипы Spacematrix</h3><div id="spacematrix-bars"></div><p class="metric-note">Группы определяются по l, FSI, MXI. Номер кластера — категория, не ранг.</p></article><article class="card chart-card"><h3>Все числовые показатели</h3><label for="distribution-metric">Выберите распределение</label><select id="distribution-metric"></select><p class="metric-note" id="distribution-note"></p><div id="metric-hist"></div></article></div><div class="two-col" style="margin-top:16px"><article class="card chart-card"><h3>Интенсивность застройки · FSI</h3><div id="fsi-hist"></div></article><article class="card chart-card"><h3>Покрытие застройкой · GSI</h3><div id="gsi-hist"></div></article></div></section>
 <section id="mobility"><div class="section-top"><div><div class="section-label">04 · Модель движения</div><h2>Автомобильная доступность</h2></div><p>Показатель рассчитан по направленному автомобильному графу и площадям кварталов назначения. Его нельзя интерпретировать как реальное время поездки.</p></div><div class="access-grid"><article class="card chart-card"><h3>Распределение времени по кварталам</h3><p class="chart-caption">Площадно-взвешенное модельное время, минут</p><div id="time-hist"></div><p class="metric-note">Нулевые времена между некоторыми парами кварталов связаны с привязкой к одному узлу графа. Время от зданий до узла графа и парковки не учитывается.</p></article><article class="card chart-card"><h3>Крайние значения</h3><p class="chart-caption">Кварталы с наиболее низким и высоким расчётным временем</p><div class="toplist"><div><div class="side-head">Низкие значения</div><div id="fast-list"></div></div><div><div class="side-head">Высокие значения</div><div id="slow-list"></div></div></div><div class="chart-bottom">Сравнение показывает различия пространственного положения кварталов относительно дорожной сети.</div></article></div></section>
 <section id="schools"><div class="section-top"><div><div class="section-label">05 · Образовательная инфраструктура</div><h2>Школы и расчётный спрос</h2></div><p>Обеспеченность учитывает распределение мест и конкуренцию кварталов. Нулевой спрос даёт неопределённую долю, а не 0%.</p></div><div class="school-grid"><article class="card comparison"><h3>Спрос и модельная вместимость</h3><div class="compare-row"><div class="compare-label"><span>Расчётный спрос</span><strong id="demand-value"></strong></div><div class="compare-track"><i id="demand-bar" style="background:#c68e69"></i></div></div><div class="compare-row"><div class="compare-label"><span>Модельная вместимость</span><strong id="capacity-value"></strong></div><div class="compare-track"><i id="capacity-bar" style="background:#649e94"></i></div></div><p class="metric-note" id="school-ratio"></p></article><article class="card chart-card"><h3>Доля обеспеченного спроса по городу</h3><p id="city-provision"></p><p id="school-parameters" class="metric-note"></p><p>Объектов: <strong id="school-sites">—</strong>; кварталов с определённой долей: <strong id="school-valid">—</strong>.</p><p class="metric-note">Городская доля считается через суммы спроса. Простое среднее квартальных долей — другая величина. Распределения strong и weak доступны в «Все числовые показатели».</p>__SCHOOL_DETAILS__</article></div></section>
 <section id="data"><div class="section-top"><div><div class="section-label">06 · Полный набор показателей</div><h2>Исходные значения по кварталам</h2></div><p>Таблица показывает ключевые характеристики и любой дополнительный атрибут по выбору. Полный набор полей доступен в CSV.</p></div><div class="card data-card"><div class="table-tools"><div class="table-actions"><input type="search" id="table-search" placeholder="Найти квартал по ID" aria-label="Поиск квартала"><select id="extra-field" aria-label="Дополнительный показатель"></select></div><div class="table-actions"><button class="btn" id="clear-search">Сбросить поиск</button><button class="btn primary" id="export-csv">Скачать CSV · все поля</button></div></div><div class="table-scroll"><table><thead><tr><th>ID</th><th>Функция</th><th>Морфотип</th><th>Население · оценка</th><th>FSI</th><th>Время · мин</th><th id="extra-header">Доп. показатель</th></tr></thead><tbody id="data-tbody"></tbody></table></div><div class="table-status" id="table-status"></div></div></section>
 <section id="details"><div class="section-top"><div><div class="section-label">07 · Воспроизводимость</div><h2>Расчётные таблицы и выводы</h2></div><p>Таблицы и CSV встроены в этот HTML. Матрица доступна целиком для скачивания без сети.</p></div>__SAVED_TABLES__</section>
-<section id="method"><div class="section-top"><div><div class="section-label">08 · Методика</div><h2>Методика и качество данных</h2></div></div>__METHOD__<div class="quality-grid">__QUALITY_CARDS__</div></section>
+<section id="method"><div class="section-top"><div><div class="section-label">08 · Методика</div><h2>Методика и качество данных</h2></div></div>__METHOD__</section>
 </main>
 <footer class="foot"><div class="max foot-in"><span>Лодейное Поле · Исследование кварталов на основе BlocksNet</span><span>Автономный HTML · значения из сохранённых GeoJSON и CSV, сверенные при сборке</span></div></footer>
 <script id="dataset" type="application/json">__DATA__</script>
@@ -632,11 +642,22 @@ function palette(v,k){if(v==null)return '#cbd6d3';if(k==='land_use')return COLOR
 let shapes=new Map();
 for(const b of B){const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',b.d);path.setAttribute('data-id',String(b.id));path.setAttribute('class','geo');path.setAttribute('tabindex','0');path.setAttribute('aria-label','Квартал '+b.id);path.addEventListener('mouseenter',e=>{tooltip(e,b);});path.addEventListener('mousemove',e=>tooltip(e,b));path.addEventListener('mouseleave',()=>{el('map-tip').style.display='none';});path.addEventListener('click',()=>{selected=b.id;updateSelect();});path.addEventListener('keydown',e=>{if(e.key==='Enter'){selected=b.id;updateSelect();}});mapLayer.append(path);shapes.set(b.id,path);}
 function tooltip(evt,b){const t=el('map-tip'),r=el('map-shell').getBoundingClientRect();t.textContent=`Квартал №${b.id} · ${valueString(b.p[field],field)}`;t.style.display='block';t.style.left=(Math.min(evt.clientX-r.left+13,r.width-220))+'px';t.style.top=(Math.max(10,evt.clientY-r.top-50))+'px';}
-function schoolDots(){schoolLayer.replaceChildren();for(const b of B.filter(x=>x.p.school_count>0&&shown(x))){const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('cx',b.cx);dot.setAttribute('cy',b.cy);dot.setAttribute('r',5);dot.setAttribute('fill','#e5a96b');dot.setAttribute('stroke','#fff');dot.setAttribute('stroke-width','2');dot.style.pointerEvents='none';schoolLayer.append(dot);}}
+function schoolDots(){schoolLayer.replaceChildren();if(!el('show-schools').checked)return;for(const school of DATA.schools){
+ const b=B.find(x=>x.id===school.block_id);if(!shown(b))continue;
+ const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('cx',school.cx);dot.setAttribute('cy',school.cy);dot.setAttribute('r',4);dot.setAttribute('fill','#e5a96b');dot.setAttribute('stroke','#fff');dot.setAttribute('stroke-width','1.5');
+ dot.setAttribute('data-school-id',school.id);dot.setAttribute('data-block-id',school.block_id);dot.style.cursor='pointer';
+ const title=document.createElementNS('http://www.w3.org/2000/svg','title');title.textContent=school.name+' · квартал №'+school.block_id;dot.append(title);
+ dot.addEventListener('click',()=>{selected=school.block_id;updateSelect();});schoolLayer.append(dot);
+}}
 function drawMap(){for(const b of B){const p=shapes.get(b.id);p.setAttribute('fill',palette(b.p[field],field));p.classList.toggle('dim',!shown(b));p.classList.toggle('focused',b.id===selected);}schoolDots();el('map-count').textContent=visible().length+' / '+B.length;drawLegend();}
 function drawLegend(){const box=el('legend');box.replaceChildren();let items=[];
  if(field==='land_use')items=landOrder.map(k=>[cat(k,LU),COLORS[String(k)],visible().filter(b=>b.p.land_use===k).length]);
  else if(field==='strelka_morphotype')items=morphOrder.map(k=>[cat(k,MORPH),MCP[String(k)],visible().filter(b=>b.p.strelka_morphotype===k).length]);
+ else if(field==='school_count'){
+  const counts=categories(field).sort((a,b)=>a==null?1:b==null?-1:a-b);
+  const schoolNames={one:'школа',few:'школы',many:'школ',other:'школы'},plural=new Intl.PluralRules('ru-RU');
+  items=counts.map(k=>[k==null?'Нет данных':k===0?'Нет школ':`${fmt(k)} ${schoolNames[plural.select(k)]}`,palette(k,field),visible().filter(b=>(b.p[field]??null)===k).length]);
+ }
  else if(isNumeric(field)){const [mi,ma]=domain(field);for(let i=0;i<5;i++){const a=mi+(ma-mi)*i/5,z=mi+(ma-mi)*(i+1)/5;items.push([`${fmt(a,2)} – ${fmt(z,2)}`,scaleColors[i],null]);}const missing=visible().filter(b=>b.p[field]==null).length;if(missing)items.push(['Нет данных','#cbd6d3',missing]);}
  else {const keys=[...new Set(visible().map(b=>b.p[field]??null))];items=keys.map(k=>[valueString(k,field),palette(k,field),visible().filter(b=>(b.p[field]??null)===k).length]);}
  for(const [name,c,count] of items){const row=document.createElement('div');row.className='legend-item';const a=document.createElement('span');a.className='legend-text';const sw=document.createElement('i');sw.className='swatch';sw.style.background=c;const labelEl=document.createElement('span');labelEl.textContent=name;a.append(sw,labelEl);row.append(a);if(count!==null){const right=document.createElement('span');right.className='legend-count';right.textContent=fmt(count);row.append(right);}box.append(row);}
@@ -657,6 +678,7 @@ el('distribution-metric').addEventListener('change',drawDistribution);
 function update(){selected=selected!=null&&shown(B.find(b=>b.id===selected))?selected:null;drawMap();updateSelect();drawBars('land-bars','land_use',landOrder,LU,COLORS);drawBars('morph-bars','strelka_morphotype',morphOrder,MORPH,MCP);drawBars('spacematrix-bars','spacematrix_morphotype',spaceOrder,MORPH,spaceColors);hist('fsi-hist','fsi');hist('gsi-hist','gsi');hist('time-hist','area_accessibility');drawDistribution();outliers();drawTable();}
 function setView(){svg.setAttribute('viewBox',`${view.x} ${view.y} ${view.w} ${view.h}`);}
 function zoom(factor){const cx=view.x+view.w/2,cy=view.y+view.h/2;const w=Math.min(1300,Math.max(90,view.w*factor)),h=w*590/970;view={x:cx-w/2,y:cy-h/2,w,h};setView();}
+el('show-schools').addEventListener('change',schoolDots);
 el('zoom-in').addEventListener('click',()=>zoom(.77));el('zoom-out').addEventListener('click',()=>zoom(1.3));el('zoom-reset').addEventListener('click',()=>{view={x:0,y:0,w:970,h:590};setView();});
 svg.addEventListener('wheel',e=>{e.preventDefault();zoom(e.deltaY>0?1.13:.88);},{passive:false});let drag=null;svg.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,ox:view.x,oy:view.y,move:false};});svg.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)<=3&&!drag.move)return;if(!drag.move){drag.move=true;svg.setPointerCapture(e.pointerId);}const rect=svg.getBoundingClientRect();view.x=drag.ox-dx/rect.width*view.w;view.y=drag.oy-dy/rect.height*view.h;setView();});svg.addEventListener('pointerup',()=>{drag=null;});svg.addEventListener('pointercancel',()=>{drag=null;});
 el('metric').addEventListener('change',e=>{field=e.target.value;updateSelect();});el('lu-filter').addEventListener('change',e=>{filterLU=e.target.value;update();});el('morph-filter').addEventListener('change',e=>{filterMorph=e.target.value;update();});el('reset-filters').addEventListener('click',()=>{filterLU='all';filterMorph='all';selected=null;el('lu-filter').value='all';el('morph-filter').value='all';update();});el('extra-field').addEventListener('change',e=>{extra=e.target.value;drawTable();});el('table-search').addEventListener('input',e=>{search=e.target.value.trim();drawTable();});el('clear-search').addEventListener('click',()=>{search='';el('table-search').value='';drawTable();});
@@ -683,8 +705,7 @@ def build_dashboard() -> Path:
     data = make_dataset(features, summary)
     data_json = json.dumps(data, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
     data_json = data_json.replace("</", "<\\/")
-    page = TEMPLATE.replace("__QUALITY_CARDS__", quality_cards())
-    page = page.replace("__SAVED_TABLES__", saved_tables_html(summary, features))
+    page = TEMPLATE.replace("__SAVED_TABLES__", saved_tables_html(summary, features))
     page = page.replace("__SCHOOL_DETAILS__", school_details_html()).replace("__METHOD__", method_html(summary))
     page = page.replace("__DATA__", data_json)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
